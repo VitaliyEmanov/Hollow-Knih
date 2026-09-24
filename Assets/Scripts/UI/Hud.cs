@@ -109,7 +109,7 @@ namespace AshenWick
             Game.I.Sound.Play("rest", 0.6f, 0f);
             while (splashT < 3.4f)
             {
-                if (splashT > 0.6f && Input.anyKeyDown) break;
+                if (splashT > 0.6f && Controls.AnyDown) break;
                 yield return null;
             }
             splash = false;
@@ -127,7 +127,7 @@ namespace AshenWick
                 while (t < 5.5f)
                 {
                     t += Time.unscaledDeltaTime;
-                    if (t > 0.4f && (Controls.ConfirmPressed || Input.GetKeyDown(KeyCode.Escape))) break;
+                    if (t > 0.4f && (Controls.ConfirmPressed || Controls.Tap(KeyCode.Escape))) break;
                     yield return null;
                 }
                 while (cineAlpha > 0f) { cineAlpha -= Time.unscaledDeltaTime * 2f; yield return null; }
@@ -199,7 +199,7 @@ namespace AshenWick
             if (panel != null)
             {
                 panelT += dt;
-                if (panelT > 1f && (Controls.ConfirmPressed || Controls.InteractPressed || Input.GetKeyDown(KeyCode.Escape)))
+                if (panelT > 1f && (Controls.ConfirmPressed || Controls.InteractPressed || Controls.Tap(KeyCode.Escape)))
                 {
                     panel = null;
                     g.Sound.Play("ui", 0.5f);
@@ -225,7 +225,7 @@ namespace AshenWick
             if (Controls.MenuUp) { menuIndex = (menuIndex + items.Count - 1) % items.Count; g.Sound.Play("ui", 0.4f); }
             if (Controls.MenuDown) { menuIndex = (menuIndex + 1) % items.Count; g.Sound.Play("ui", 0.4f); }
             menuIndex = Mathf.Clamp(menuIndex, 0, items.Count - 1);
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.JoystickButton0))
+            if (Controls.Tap(KeyCode.Return) || Controls.Tap(KeyCode.Z) || Controls.Tap(KeyCode.Space) || Controls.Tap(KeyCode.X) || Controls.Tap(KeyCode.JoystickButton0))
             {
                 g.Sound.Play("pickup", 0.5f);
                 switch (items[menuIndex])
@@ -252,12 +252,12 @@ namespace AshenWick
         {
             if (showControls)
             {
-                if (Controls.ConfirmPressed || Input.GetKeyDown(KeyCode.Backspace)) showControls = false;
+                if (Controls.ConfirmPressed || Controls.Tap(KeyCode.Backspace)) showControls = false;
                 return;
             }
             if (Controls.MenuUp) { pauseIndex = (pauseIndex + 2) % 3; g.Sound.Play("ui", 0.4f); }
             if (Controls.MenuDown) { pauseIndex = (pauseIndex + 1) % 3; g.Sound.Play("ui", 0.4f); }
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.JoystickButton0))
+            if (Controls.Tap(KeyCode.Return) || Controls.Tap(KeyCode.Z) || Controls.Tap(KeyCode.Space) || Controls.Tap(KeyCode.X) || Controls.Tap(KeyCode.JoystickButton0))
             {
                 g.Sound.Play("ui", 0.5f);
                 if (pauseIndex == 0) g.Resume();

@@ -130,36 +130,44 @@ namespace AshenWick
                 {
                     char ch = def.At(x, y);
                     var feet = new Vector2(x + 0.5f, y); // standing on the bottom of the cell
-                    switch (ch)
+                    try
                     {
-                        case 'P': StartPos = feet; break;
-                        case 'B': BenchPos = feet; Spawn<Bench>(feet); break;
-                        case 'T':
-                            {
-                                var t = Spawn<Tablet>(feet);
-                                t.Text = tabletIndex < def.Tablets.Length ? def.Tablets[tabletIndex] : "…";
-                                tabletIndex++;
+                        switch (ch)
+                        {
+                            case 'P': StartPos = feet; break;
+                            case 'B': BenchPos = feet; Spawn<Bench>(feet); break;
+                            case 'T':
+                                {
+                                    var t = Spawn<Tablet>(feet);
+                                    t.Text = tabletIndex < def.Tablets.Length ? def.Tablets[tabletIndex] : "…";
+                                    tabletIndex++;
+                                    break;
+                                }
+                            case 'N': Spawn<Npc>(feet).Setup(def.NpcId); break;
+                            case 'A': Spawn<Altar>(feet).Setup(def.Ability); break;
+                            case 'S':
+                                {
+                                    string id = def.Id + "#" + shardIndex++;
+                                    if (!save.HasShard(id)) Spawn<WaxShardPickup>(feet + new Vector2(0, 0.6f)).Id = id;
+                                    break;
+                                }
+                            case 'c': Spawn<AshCrawler>(feet); break;
+                            case 'm': Spawn<SootMoth>(feet + new Vector2(0, 0.5f)); break;
+                            case 'h': Spawn<CinderHusk>(feet); break;
+                            case 's': Spawn<AshSpitter>(feet); break;
+                            case 'w': Spawn<EmberWisp>(feet + new Vector2(0, 0.5f)); break;
+                            case 'K':
+                                if (!string.IsNullOrEmpty(def.Boss) && !save.BossDead(def.Boss))
+                                {
+                                    dormantBoss = Boss.Create(def.Boss, feet, this);
+                                }
                                 break;
-                            }
-                        case 'N': Spawn<Npc>(feet).Setup(def.NpcId); break;
-                        case 'A': Spawn<Altar>(feet).Setup(def.Ability); break;
-                        case 'S':
-                            {
-                                string id = def.Id + "#" + shardIndex++;
-                                if (!save.HasShard(id)) Spawn<WaxShardPickup>(feet + new Vector2(0, 0.6f)).Id = id;
-                                break;
-                            }
-                        case 'c': Spawn<AshCrawler>(feet); break;
-                        case 'm': Spawn<SootMoth>(feet + new Vector2(0, 0.5f)); break;
-                        case 'h': Spawn<CinderHusk>(feet); break;
-                        case 's': Spawn<AshSpitter>(feet); break;
-                        case 'w': Spawn<EmberWisp>(feet + new Vector2(0, 0.5f)); break;
-                        case 'K':
-                            if (!string.IsNullOrEmpty(def.Boss) && !save.BossDead(def.Boss))
-                            {
-                                dormantBoss = Boss.Create(def.Boss, feet, this);
-                            }
-                            break;
+                        }
+                    }
+                    catch (System.Exception e)
+                    {
+                        // one broken object must not take the whole room down
+                        Debug.LogException(e);
                     }
                 }
 

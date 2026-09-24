@@ -81,7 +81,8 @@ namespace AshenWick
             Time.timeScale = 1f;
             hitStop = 0; slowMo = 1; slowMoTimer = 0;
             DestroyPlayer();
-            LoadRoomRaw("outskirts");
+            try { LoadRoomRaw("outskirts"); }
+            catch (System.Exception e) { Debug.LogException(e); }
             Cam.SetImmediate(new Vector2(22f, 11f));
             Cam.Follow = null;
             State = GameState.Title;
@@ -170,6 +171,12 @@ namespace AshenWick
 
         /// <summary>Loads a room and places the player: at a door, a bench ('B') or the new game spot ('\0').</summary>
         void LoadRoom(string id, char entry, bool snapCamera)
+        {
+            try { LoadRoomCore(id, entry, snapCamera); }
+            catch (System.Exception e) { Debug.LogException(e); }
+        }
+
+        void LoadRoomCore(string id, char entry, bool snapCamera)
         {
             LoadRoomRaw(id);
             Vector2 pos;
