@@ -54,11 +54,12 @@ namespace AshenWick
     public sealed class Flasher
     {
         readonly List<SpriteRenderer> renderers = new List<SpriteRenderer>();
-        readonly MaterialPropertyBlock block = new MaterialPropertyBlock();
+        // Created lazily: Flasher lives in MonoBehaviour field initializers, where Unity
+        // forbids calling its API (MaterialPropertyBlock, Shader.PropertyToID).
+        MaterialPropertyBlock block;
         float amount;
         Color color = Color.white;
-        static readonly int FlashAmountId = Shader.PropertyToID("_FlashAmount");
-        static readonly int FlashColorId = Shader.PropertyToID("_FlashColor");
+        static int flashAmountId = -1, flashColorId = -1;
 
         public void Add(SpriteRenderer sr) { if (sr != null) renderers.Add(sr); }
 
@@ -84,13 +85,19 @@ namespace AshenWick
 
         void Apply()
         {
+            if (block == null) block = new MaterialPropertyBlock();
+            if (flashAmountId < 0)
+            {
+                flashAmountId = Shader.PropertyToID("_FlashAmount");
+                flashColorId = Shader.PropertyToID("_FlashColor");
+            }
             for (int i = 0; i < renderers.Count; i++)
             {
                 var sr = renderers[i];
                 if (sr == null) continue;
                 sr.GetPropertyBlock(block);
-                block.SetFloat(FlashAmountId, amount);
-                block.SetColor(FlashColorId, color);
+                block.SetFloat(flashAmountId, amount);
+                block.SetColor(flashColorId, color);
                 sr.SetPropertyBlock(block);
             }
         }
