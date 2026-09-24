@@ -127,6 +127,10 @@ namespace AshenWick.Art
                     c.Px[i] = col;
                 }
 
+            // 3b) pen hatching on the shadowed faces of the rock, and paper grain
+            c.Hatch(2.4f, 0.45f);
+            c.Paper(0.1f, seed + 31);
+
             // 4) platforms, spikes, molten wax
             var rng = new System.Random(seed + 13);
             for (int gy = 0; gy < th; gy++)
@@ -191,10 +195,26 @@ namespace AshenWick.Art
                     col = Color.Lerp(col, t.Fog, (haze - 0.4f) * 0.35f);
                     c.Px[y * 256 + x] = new Color(col.r, col.g, col.b, 1f);
                 }
+            // painted clouds: layered soft brush dabs, darker undersides
+            var rng = new System.Random(t.Seed + 77);
+            for (int k = 0; k < 18; k++)
+            {
+                float cx = (float)rng.NextDouble() * 256, cy = 110 + (float)rng.NextDouble() * 130;
+                float w = 30 + (float)rng.NextDouble() * 60, h = 6 + (float)rng.NextDouble() * 10;
+                Color light = Color.Lerp(t.SkyTop, t.Fog, 0.6f), dark = Color.Lerp(t.Sky, t.SkyTop, 0.3f);
+                for (int j = 0; j < 7; j++)
+                {
+                    float dx = ((float)rng.NextDouble() - 0.5f) * w, dy = ((float)rng.NextDouble() - 0.5f) * h;
+                    float r = h * (0.6f + (float)rng.NextDouble() * 0.7f);
+                    c.Ellipse(cx + dx, cy + dy - r * 0.25f, r * 2.2f, r * 0.8f, dark.WithA(0.18f));
+                    c.Ellipse(cx + dx, cy + dy, r * 2f, r * 0.7f, light.WithA(0.14f));
+                }
+            }
             // dim sun / furnace glow
             float gx = area == 2 ? 128 : 170, gy = area == 3 ? 60 : 170;
             c.Glow(gx, gy, 120, t.Glow.WithA(area == 2 ? 0.25f : 0.35f), 2f);
             c.Glow(gx, gy, 30, t.Glow.WithA(area == 2 ? 0.2f : 0.5f), 1.5f);
+            c.Paper(0.1f, t.Seed + 3);
             return c;
         }
 
@@ -231,8 +251,23 @@ namespace AshenWick.Art
                     default: HearthShape(c, x, baseH - 10, scale, rng, paint, t, depth); break;
                 }
             }
-            // atmospheric fade at the bottom so layers blend into fog
-            if (depth < 2) c.Grain(0.06f, 0.05f, t.Seed + depth);
+            // hand-painted finish: brush streaks, pooled pigment, dry-brush edges
+            c.Painterly(t.Seed + depth * 13, 0.12f, depth == 2 ? 0.3f : 0.18f, depth == 0 ? 6f : 4f);
+            if (depth == 2) c.Hatch(2.2f, 0.35f);
+            c.Paper(0.12f, t.Seed + depth);
+            // mist lying in the lowlands between layers
+            for (int y = 0; y < BgH; y++)
+            {
+                float fy = y / (float)BgH;
+                float mist = Mathf.Clamp01(1f - fy * 3.2f) * (depth == 0 ? 0.55f : depth == 1 ? 0.35f : 0.15f);
+                if (mist <= 0f) continue;
+                for (int x = 0; x < BgW; x++)
+                {
+                    float u = x / (float)BgW * Mathf.PI * 2;
+                    float n = 0.6f + 0.4f * Mathf.Sin(u * 3 + y * 0.05f + depth) * Mathf.Sin(u * 7 + 1.7f);
+                    c.Blend(x, y, t.Fog.WithA(1f), mist * n);
+                }
+            }
             return c;
         }
 

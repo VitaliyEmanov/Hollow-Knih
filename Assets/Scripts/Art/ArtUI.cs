@@ -100,7 +100,7 @@ namespace AshenWick.Art
                 c.Brush(V(cx, cy + 82), V(cx + Mathf.Sin(a) * 30, cy + 102), tip, 18, 2, k % 2 == 0 ? leaf : leafDark);
             }
             c.Capsule(cx, cy + 90, cx + 6, cy + 128, 5, 3, leafDark);
-            c.Outline(Hex("1a0610"), 3f);
+            c.FlatOutline(Hex("1a0610"), 3f);
             return c;
         }
 
